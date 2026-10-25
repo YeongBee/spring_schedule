@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.sub'
+version = '0.0.1-SNAPSHOT'
+description = 'schejulde'
+
+java {
+    toolchain {
+        // Spring Boot 3.2.5 공식 지원: Java 17 ~ 22 (LTS인 17 또는 21 권장)
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 1. 핵심 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'org.springframework.boot:spring-boot-starter-web' // webmvc -> web으로 변경
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+
+    // 2. Lombok 설정 (Java 25 호환을 위해 최신 버전 명시)
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // 3. 테스트 의존성 (3.x 표준 starter-test로 통합)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok:1.18.38'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // 운영 컨테이너(UTC 가정)와 동일한 조건에서 한국 시간 기준 동작을 검증
+    systemProperty 'user.timezone', 'UTC'
+    systemProperty 'net.bytebuddy.experimental', 'true'
+}
